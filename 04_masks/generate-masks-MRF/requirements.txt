@@ -1,0 +1,8 @@
+numpy>=1.24
+scipy>=1.10
+scikit-image>=0.20
+scikit-learn>=1.2
+pillow>=9.0
+tqdm>=4.60
+matplotlib>=3.6
+gco-wrapper>=3.0

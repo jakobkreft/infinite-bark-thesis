@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Semantically Guided Diffusion Models for Infinitely Large Toroidal Textures. A two-stage pipeline that generates seamless toroidal, cylindrical and spherical bark textures with controllable semantic composition.">
+  <meta name="keywords" content="diffusion models, infinite textures, toroidal textures, bark, semantic segmentation, generative models, panorama, latent diffusion">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Semantically Guided Diffusion Models for Infinitely Large Toroidal Textures</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="#abstract">Abstract</a>
+      <a class="navbar-item" href="#method">Method</a>
+      <a class="navbar-item" href="#results">Results</a>
+      <a class="navbar-item" href="#dataset">Dataset</a>
+      <a class="navbar-item" href="#BibTeX">BibTeX</a>
+    </div>
+  </div>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Semantically Guided Diffusion Models for Infinitely Large Toroidal Textures</h1>
+          <h2 class="subtitle is-4 publication-title" style="margin-top: 0.5em; color: #666;">Semantično vodeni difuzijski modeli za neskončno velike toroidne teksture</h2>
+          <div class="is-size-5 publication-authors" style="margin-top: 1.5em;">
+            <span class="author-block">
+              <a href="https://github.com/jakobkreft">Jakob Kreft</a><sup>1</sup>
+            </span>
+          </div>
+
+          <div class="is-size-6 publication-authors" style="margin-top: 0.75em;">
+            <span class="author-block">Mentor: izr. prof. dr. Janez Perš<sup>1</sup>,</span>
+            <span class="author-block">Somentor: prof. dr. Matija Marolt<sup>2</sup>,</span>
+            <span class="author-block">Somentor: asist. dr. Žiga Lesar<sup>2</sup></span>
+          </div>
+
+          <div class="is-size-6 publication-authors" style="margin-top: 0.5em;">
+            <span class="author-block"><sup>1</sup>University of Ljubljana, Faculty of Electrical Engineering,</span>
+            <span class="author-block"><sup>2</sup>University of Ljubljana, Faculty of Computer and Information Science</span>
+          </div>
+
+          <div class="is-size-6 publication-authors" style="margin-top: 0.5em;">
+            <span class="author-block"><em>Master's thesis, 2026</em></span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="#"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Thesis (PDF)</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://github.com/jakobkreft/infinite-bark-thesis"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span>
+              <!-- Dataset Link. -->
+              <span class="link-block">
+                <a href="https://huggingface.co/datasets/jakobkreft/spruce-log-bark-segmentation"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="far fa-images"></i>
+                  </span>
+                  <span>Dataset</span>
+                  </a>
+              </span>
+              <!-- Weights Link. -->
+              <span class="link-block">
+                <a href="https://huggingface.co/jakobkreft/diffinfinite-bark"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-cube"></i>
+                  </span>
+                  <span>Model Weights</span>
+                  </a>
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <div class="columns is-vcentered">
+        <div class="column is-one-third has-text-centered">
+          <video id="teaser" autoplay muted loop playsinline
+                 style="max-height: 70vh; width: auto; max-width: 100%; border-radius: 8px;">
+            <source src="./static/videos/teaser.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="column">
+          <div class="content">
+            <h2 class="title is-4">Seamless textures of arbitrary size</h2>
+            <p>
+              A two-stage pipeline generates <strong>seamless bark textures</strong>
+              of arbitrary size on toroidal, cylindrical and spherical canvases.
+            </p>
+            <ul>
+              <li><strong>Stage 1 &mdash;</strong> Wave Function Collapse / MRF produces a low-resolution
+                  semantic map with controllable global class proportions.</li>
+              <li><strong>Stage 2 &mdash;</strong> A latent diffusion model conditioned on the map
+                  synthesises the full-resolution texture on an infinite canvas
+                  with periodic boundary conditions.</li>
+              <li><strong>Geometries &mdash;</strong> the same model wraps onto a torus, a log
+                  cylinder, or a sphere via equirectangular projection.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="hero is-light is-small">
+  <div class="hero-body">
+    <div class="container">
+      <div id="results-carousel" class="carousel results-carousel">
+        <div class="item">
+          <img src="./static/images/torus_tiled.jpg" alt="Toroidal texture tiled 2x2">
+        </div>
+        <div class="item">
+          <img src="./static/images/torus_5000.jpg" alt="Toroidal sample, 5000 steps">
+        </div>
+        <div class="item">
+          <img src="./static/images/torus_10000.jpg" alt="Toroidal sample, 10000 steps">
+        </div>
+        <div class="item">
+          <img src="./static/images/cylinder_render.jpg" alt="Cylindrical bark render in Blender">
+        </div>
+        <div class="item">
+          <img src="./static/images/synth_5000_viz.png" alt="Synthesised bark texture at 5000 steps">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="abstract">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Diffusion generative models have set the state of the art in image synthesis,
+            but they are typically trained on small crops and produce images of comparable
+            size. Many practical applications instead require very large, periodic images:
+            seamless textures for graphics, 360&deg; panoramas, or planet-scale maps.
+            Existing approaches struggle with seam artefacts at tile boundaries and a lack
+            of <em>global</em> consistency, such as overly long uniform regions or
+            unrealistic class proportions.
+          </p>
+          <p>
+            We address this with a <strong>two-stage pipeline</strong>. First, simple
+            generative models &mdash; Wave Function Collapse, Markov Random Fields,
+            autoregressive models and neural cellular automata &mdash; produce a
+            low-resolution semantic map that combines local pattern statistics with
+            global class proportions. Second, a latent diffusion model in the spirit of
+            DiffInfinite synthesises a high-resolution image from the map using
+            overlapping patch updates, with periodic indexing adapted to <strong>toroidal,
+            cylindrical and spherical</strong> geometries.
+          </p>
+          <p>
+            As the main practical case study we tackle <strong>tree-log bark</strong>:
+            a log is cylindrical along its circumference, yet in practice only part of
+            its surface can be photographed at high resolution. From a limited set of
+            field-captured and segmented bark images we learn a model that generates
+            seamless toroidal and cylindrical textures with controllable distributions
+            of bark, knots and mechanical damage.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+  </div>
+</section>
+
+
+<section class="section" id="method">
+  <div class="container is-max-desktop">
+
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Method</h2>
+        <div class="content has-text-justified">
+          <p>
+            The pipeline runs in four stages, decoupling <em>what</em> appears in the
+            texture (the semantic layout) from <em>how</em> it looks (the appearance).
+          </p>
+        </div>
+
+        <!-- Stage 1: Capture & preprocessing -->
+        <h3 class="title is-4">1. Field capture and preprocessing</h3>
+        <div class="content has-text-justified">
+          <p>
+            In collaboration with the Department of Forestry and Renewable Forest
+            Resources at the Biotechnical Faculty, we captured high-resolution photos of
+            spruce logs at several sites. A custom rotate-and-crop toolchain isolates
+            each log from the background, while an unwrap step reprojects the visible
+            cylindrical surface into a flat 2D image, removing the perspective
+            distortion that would otherwise corrupt training patches.
+          </p>
+        </div>
+
+        <!-- Stage 2: Semantic segmentation -->
+        <h3 class="title is-4">2. Semantic segmentation</h3>
+        <div class="content has-text-justified">
+          <p>
+            Approximately 100 hand-labelled bark images, reduced from seven to three
+            classes (bark, knots/blind buds, mechanical damage), are used to fine-tune
+            a DeepLabv3+ResNet50 segmenter pre-trained on ImageNet. The model produces
+            both the masks used to train the diffusion model and the masks used to
+            evaluate generated textures by comparing class proportions.
+          </p>
+        </div>
+
+        <!-- Stage 3: Semantic map generation -->
+        <h3 class="title is-4">3. Semantic map generation (WFC / MRF)</h3>
+        <div class="content has-text-justified">
+          <p>
+            A Wave Function Collapse algorithm extracts local compatibility rules from
+            the segmented bark masks and propagates them deterministically across an
+            arbitrarily large canvas. A Markov Random Field variant offers a
+            stochastic alternative that more closely matches global class proportions.
+            Both produce low-resolution semantic maps that respect periodic boundary
+            conditions, and can be edited or sketched by hand for controllable output.
+          </p>
+        </div>
+
+        <!-- Stage 4: Diffusion synthesis -->
+        <h3 class="title is-4">4. Infinite-canvas latent diffusion</h3>
+        <div class="content has-text-justified">
+          <p>
+            Building on Stable Diffusion and DiffInfinite, a latent diffusion model is
+            conditioned on the semantic map via cross-attention. Sampling is performed
+            on a large latent canvas: overlapping patches are denoised with one
+            timestep counter per latent pixel, ensuring globally consistent denoising
+            without seams. By indexing patch coordinates modulo the canvas dimensions,
+            the same model produces fully periodic <em>toroidal</em> textures,
+            <em>cylindrical</em> textures wrapping around a log, and (as future work)
+            <em>spherical</em> 360&deg; panoramas via equirectangular projection.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<section class="section" id="results">
+  <div class="container is-max-desktop">
+
+    <div class="columns is-centered">
+
+      <!-- Toroidal results. -->
+      <div class="column">
+        <div class="content">
+          <h2 class="title is-3">Toroidal Textures</h2>
+          <p>
+            Tiled 2&times;2 to verify seamlessness: the texture wraps in both
+            directions without visible seams or repetition.
+          </p>
+          <img src="./static/images/torus_tiled.jpg" alt="Toroidal texture tiled 2x2">
+        </div>
+      </div>
+
+      <!-- Cylindrical results. -->
+      <div class="column">
+        <h2 class="title is-3">Cylindrical Bark</h2>
+        <div class="columns is-centered">
+          <div class="column content">
+            <p>
+              Wrapped onto a Blender-rendered log to validate the cylindrical
+              periodicity in a 3D context.
+            </p>
+            <img src="./static/images/cylinder_render.jpg" alt="Cylindrical bark Blender render">
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Training progression. -->
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Training Progression</h2>
+
+        <h3 class="title is-4">Sample evolution across checkpoints</h3>
+        <div class="content has-text-justified">
+          <p>
+            Drag the slider to scrub through 40 checkpoints saved every 5,000 steps
+            of training, from 5k up to 200k steps, all generated from the same
+            semantic map.
+          </p>
+        </div>
+        <div class="columns is-vcentered interpolation-panel">
+          <div class="column is-3 has-text-centered">
+            <img src="./static/images/progress/sample-1.png"
+                 class="interpolation-image"
+                 alt="Early checkpoint (5k steps)."/>
+            <p>Early checkpoint (5,000 steps)</p>
+          </div>
+          <div class="column interpolation-video-column has-text-centered">
+            <div id="interpolation-image-wrapper">
+              Loading...
+            </div>
+            <p class="is-size-5" style="margin-top: 0.75em;">
+              <strong id="interpolation-step-label">5,000 steps</strong>
+            </p>
+            <input class="slider is-fullwidth is-large is-info"
+                   id="interpolation-slider"
+                   step="1" min="0" max="39" value="0" type="range">
+          </div>
+          <div class="column is-3 has-text-centered">
+            <img src="./static/images/progress/sample-40.png"
+                 class="interpolation-image"
+                 alt="Final checkpoint (200k steps)."/>
+            <p class="is-bold">Final checkpoint (200,000 steps)</p>
+          </div>
+        </div>
+        <br/>
+
+        <!-- Evaluation summary. -->
+        <h3 class="title is-4">Quantitative evaluation</h3>
+        <div class="content has-text-justified">
+          <p>
+            Generated textures are evaluated on three levels: <strong>local realism</strong>
+            (FID, GLCM contrast / homogeneity / energy / correlation, Gram-matrix
+            distance) computed on random crops; <strong>global composition</strong>
+            (class proportions of the segmented output vs. the input semantic map, plus
+            the distribution of connected-component sizes); and an optional
+            <strong>subjective A/B comparison</strong> against simple-tiling and
+            naive-diffusion baselines.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Related work. -->
+    <div class="columns is-centered" id="related">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Related Work</h2>
+
+        <div class="content has-text-justified">
+          <p>
+            Classical texture-synthesis methods such as
+            <a href="https://people.eecs.berkeley.edu/~efros/research/NPS/efros-iccv99.pdf">non-parametric sampling</a>,
+            <a href="https://people.eecs.berkeley.edu/~efros/research/quilting/quilting.pdf">image quilting</a> and
+            <a href="https://research.microsoft.com/en-us/um/people/cohen/wangfinal_icm.pdf">Wang Tiles</a>
+            grow large textures from local statistics but lack semantic control and
+            global composition guarantees.
+          </p>
+          <p>
+            Modern part-by-part and panoramic generators &mdash;
+            <a href="https://arxiv.org/abs/1904.00284">COCO-GAN</a>,
+            <a href="https://arxiv.org/abs/2308.16582">Any-Size Diffusion</a>,
+            <a href="https://multidiffusion.github.io/">MultiDiffusion</a>,
+            <a href="https://openreview.net/forum?id=2uAaGwlP_V">PanoDiffusion</a>,
+            <a href="https://arxiv.org/abs/2407.07281">CamFreeDiff</a> and
+            <a href="https://openreview.net/forum?id=PqvMRDCJT9t">infty-Diff</a>
+            &mdash; extend diffusion to larger or unbounded domains. Our contribution
+            is to combine an infinite-canvas latent diffusion sampler with a
+            <em>semantic map</em> intermediate that gives explicit control over
+            global class proportions, and to handle toroidal, cylindrical and
+            spherical geometries within one framework.
+          </p>
+          <p>
+            Local-to-global structure in the semantic map relies on
+            <a href="https://github.com/mxgmn/WaveFunctionCollapse">Wave Function Collapse</a>,
+            Markov random fields and
+            <a href="https://distill.pub/2020/growing-ca/">growing neural cellular automata</a>;
+            segmentation uses <a href="https://arxiv.org/abs/1505.04597">U-Net</a> and
+            <a href="https://arxiv.org/abs/1606.00915">DeepLab</a>-family architectures.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<section class="section" id="dataset">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Dataset and Code</h2>
+        <div class="content has-text-justified">
+          <p>
+            The bark image dataset, segmentation masks and trained model weights are
+            released alongside the thesis. The dataset is hosted on
+            <strong>Zenodo</strong> with a citable DOI; the trained diffusion-model
+            weights are hosted on the <strong>Hugging Face Hub</strong>; the full
+            preprocessing, segmentation, semantic-map and training pipelines are on
+            <strong>GitHub</strong>.
+          </p>
+          <p>
+            The DiffInfinite-derived diffusion code lives in a separate
+            <a href="https://github.com/jakobkreft/DiffInfinite-bark">DiffInfinite-bark</a>
+            fork, included as a submodule, so that upstream attribution and our
+            modifications (P2 loss, learning-rate schedule, toroidal indexing) remain
+            clearly visible in the commit history.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@mastersthesis{kreft2026bark,
+  author  = {Kreft, Jakob},
+  title   = {Semantically Guided Diffusion Models for Infinitely Large Toroidal Textures},
+  school  = {University of Ljubljana, Faculty of Electrical Engineering},
+  year    = {2026},
+  type    = {Master's thesis},
+  address = {Ljubljana, Slovenia}
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link" href="#">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="https://github.com/jakobkreft" class="external-link">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            Master's thesis at the University of Ljubljana, Faculty of Electrical
+            Engineering, in collaboration with the Faculty of Computer and Information
+            Science and the Biotechnical Faculty (Department of Forestry and Renewable
+            Forest Resources).
+          </p>
+          <p>
+            This page is based on the
+            <a href="https://github.com/nerfies/nerfies.github.io">Nerfies project page</a>
+            template and is licensed under a <a rel="license"
+            href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,3 @@
+[submodule "05_diffusion/diffinfinite-bark"]
+	path = 05_diffusion/diffinfinite-bark
+	url = https://github.com/jakobkreft/diffinfinite-bark.git

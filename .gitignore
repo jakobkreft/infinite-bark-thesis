@@ -1,0 +1,51 @@
+# ── Python ──────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# ── Environments ────────────────────────────────────
+venv/
+.venv/
+env/
+envs/
+.env
+.conda/
+
+# ── Datasets / generated data (not tracked) ─────────
+dataset_step*/
+dataset_big/
+masks-dataset/
+masks-unwrap/
+masks-crop/
+images-crop/
+images-unwrap/
+images-lowres/
+patches_*/
+generated_masks/
+sample_masks_*/
+outputs/
+outputs_*/
+results/
+
+# ── Model weights / checkpoints ─────────────────────
+checkpoints/
+weights/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.h5
+
+# ── Logs / experiment tracking ──────────────────────
+wandb/
+runs/
+logs/
+*.log
+
+# ── OS / editor cruft ───────────────────────────────
+.DS_Store
+Thumbs.db
+.vs/
+.idea/
