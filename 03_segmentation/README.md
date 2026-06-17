@@ -7,6 +7,6 @@ ground-truth masks that the rest of the project learns from. Order:
 |------|--------|------|
 | 1 | [01_hand-segment-bark](01_hand-segment-bark) | GUI tool to hand-paint masks (creates the labels). |
 | 2 | [02_dataset-seg-bark](02_dataset-seg-bark) | Build a train/val/test dataset from the hand labels. |
-| 3 | [03_ai-segment-bark](03_ai-segment-bark) | DeepLabV3+ model — train, evaluate, infer (the main segmenter). |
+| 3 | [03_ai-segment-bark](03_ai-segment-bark) | Train the segmenter (U-Net / DeepLabV3+): 5-fold CV, final training, test evaluation. |
 
 **Classes:** `0` background · `1` slepice (pruning wounds / knots) · `2` mechanical damage.

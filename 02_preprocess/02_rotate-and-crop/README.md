@@ -1,7 +1,8 @@
-# 01 — Rotate & crop & unwrap
+# 02 — Rotate & crop & unwrap
 
 Turn photos of cylindrical logs into flat, level bark images. Works on
-image + mask pairs (the mask marks the log region).
+image + mask pairs, where the mask (the log region) comes from
+[01_log-segmentation](../01_log-segmentation).
 
 | File | Does |
 |------|------|

@@ -1,4 +1,4 @@
-# 02 — Lighting normalization
+# 03 — Lighting normalization
 
 Remove the vertical brightness gradient (dark at top/bottom, bright in the
 middle) caused by photographing a round log. Works on the CIELAB **L** channel

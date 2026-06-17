@@ -1,4 +1,4 @@
-# 03 — Crop edges
+# 04 — Crop edges
 
 Crop away the deformed top and bottom ~1/8 of each image (and its mask), keeping
 the middle band where the unwrapped bark is least distorted.
