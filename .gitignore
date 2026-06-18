@@ -49,3 +49,6 @@ logs/
 Thumbs.db
 .vs/
 .idea/
+
+# ── Personal local helper (not committed) ───────────
+structure.md
