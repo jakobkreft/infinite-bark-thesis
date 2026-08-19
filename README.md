@@ -21,3 +21,9 @@ textures rendered in 3D. Folders are numbered in pipeline order.
 
 > Each numbered subfolder is one step; most have their own short README.
 > Datasets, model weights and environments are **not** committed.
+
+## AI assistance
+
+AI tools (large language models) were used to assist with the development of this project.
+Primarily for code scaffolding, debugging, refactoring and documentation.
+All AI-assisted output was reviewed, tested and adapted by the author.
