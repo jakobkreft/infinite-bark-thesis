@@ -5,7 +5,6 @@ Project page for the master's thesis *Semantično vodeni difuzijski modeli za ne
 The thesis is published in the Repository of the University of Ljubljana (RUL):
 <https://hdl.handle.net/20.500.12556/RUL-185875>
 
-If you find this work useful, please cite:
 ```bibtex
 @mastersthesis{kreft2026toroidal,
   author  = {Kreft, Jakob},

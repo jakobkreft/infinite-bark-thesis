@@ -29,8 +29,6 @@ textures rendered in 3D. Folders are numbered in pipeline order.
 
 ## Citation
 
-If you find this work useful, please cite:
-
 ```bibtex
 @mastersthesis{kreft2026toroidal,
   author  = {Kreft, Jakob},

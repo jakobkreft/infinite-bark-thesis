@@ -7,7 +7,7 @@ var STEPS_PER_FRAME = 5000;
 var interp_images = [];
 function preloadInterpolationImages() {
   for (var i = 0; i < NUM_INTERP_FRAMES; i++) {
-    var path = INTERP_BASE + '/sample-' + (i + 1) + '.png';
+    var path = INTERP_BASE + '/sample-' + (i + 1) + '.jpg';
     interp_images[i] = new Image();
     interp_images[i].src = path;
   }
