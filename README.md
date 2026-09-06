@@ -3,6 +3,11 @@
 Master's thesis pipeline for generating **seamless (toroidal) tree-bark textures**
 with a semantically-guided diffusion model (DiffInfinite).
 
+📄 **Thesis:** *Semantično vodeni difuzijski modeli za neskončno velike toroidne teksture*,
+Jakob Kreft, University of Ljubljana, Faculty of Electrical Engineering, 2026 &mdash;
+published in the [Repository of the University of Ljubljana](https://hdl.handle.net/20.500.12556/RUL-185875).
+🌐 **Project page:** <https://jakobkreft.github.io/infinite-bark-thesis/>
+
 The pipeline goes from raw field photos of logs to synthetic, tileable bark
 textures rendered in 3D. Folders are numbered in pipeline order.
 
@@ -21,6 +26,22 @@ textures rendered in 3D. Folders are numbered in pipeline order.
 
 > Each numbered subfolder is one step; most have their own short README.
 > Datasets, model weights and environments are **not** committed.
+
+## Citation
+
+If you find this work useful, please cite:
+
+```bibtex
+@mastersthesis{kreft2026toroidal,
+  author  = {Kreft, Jakob},
+  title   = {Semantično vodeni difuzijski modeli za neskončno velike toroidne teksture},
+  school  = {University of Ljubljana, Faculty of Electrical Engineering},
+  type    = {Master's thesis},
+  address = {Ljubljana, Slovenia},
+  year    = {2026},
+  url     = {https://hdl.handle.net/20.500.12556/RUL-185875}
+}
+```
 
 ## AI assistance
 

@@ -2,15 +2,19 @@
 
 Project page for the master's thesis *Semantično vodeni difuzijski modeli za neskončno velike toroidne teksture* by Jakob Kreft (University of Ljubljana, Faculty of Electrical Engineering, 2026).
 
+The thesis is published in the Repository of the University of Ljubljana (RUL):
+<https://hdl.handle.net/20.500.12556/RUL-185875>
+
 If you find this work useful, please cite:
-```
-@mastersthesis{kreft2026bark,
+```bibtex
+@mastersthesis{kreft2026toroidal,
   author  = {Kreft, Jakob},
-  title   = {Semantically Guided Diffusion Models for Infinitely Large Toroidal Textures},
+  title   = {Semantično vodeni difuzijski modeli za neskončno velike toroidne teksture},
   school  = {University of Ljubljana, Faculty of Electrical Engineering},
-  year    = {2026},
   type    = {Master's thesis},
-  address = {Ljubljana, Slovenia}
+  address = {Ljubljana, Slovenia},
+  year    = {2026},
+  url     = {https://hdl.handle.net/20.500.12556/RUL-185875}
 }
 ```
 
