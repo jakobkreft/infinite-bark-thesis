@@ -95,7 +95,7 @@ def center_crop(arr: np.ndarray, target_h: int, target_w: int) -> np.ndarray:
     return arr[top:top + target_h, left:left + target_w].copy()
 
 
-def upscale_epx_to_factor(mask: np.ndarray, factor: int) -> np.ndarray:
+def upscale_epx_to_factor(mask: np.ndarray, factor: int, verbose: bool = True) -> np.ndarray:
     """
     Upscale a label mask so each input pixel becomes a factor x factor block,
     with EPX-rounded diagonals. factor must be a positive integer.
@@ -116,8 +116,9 @@ def upscale_epx_to_factor(mask: np.ndarray, factor: int) -> np.ndarray:
     if current.shape != (target_h, target_w):
         current = _nn_resample(current, target_h, target_w)
 
-    print(
-        f"EPX upscale: {h}x{w} -> {target_h}x{target_w} "
-        f"({n_passes} EPX passes + NN resample to exact factor {factor})"
-    )
+    if verbose:
+        print(
+            f"EPX upscale: {h}x{w} -> {target_h}x{target_w} "
+            f"({n_passes} EPX passes + NN resample to exact factor {factor})"
+        )
     return current

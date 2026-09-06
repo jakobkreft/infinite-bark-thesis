@@ -28,7 +28,9 @@ class MRFModel:
                                  each a (NUM_LABELS, NUM_LABELS) cost matrix
             target_ratio: optional (NUM_LABELS,) target class proportions
             lambda_ratio: weight for the proportion constraint bias
-            toroidal: whether to use toroidal boundary conditions
+            toroidal: whether to use toroidal boundary conditions. Either a
+                      single bool applied to both axes, or a (vertical,
+                      horizontal) tuple to control each axis independently.
         """
         self.height = height
         self.width = width
@@ -37,7 +39,10 @@ class MRFModel:
         self.pairwise = pairwise_potentials
         self.target_ratio = target_ratio
         self.lambda_ratio = lambda_ratio
-        self.toroidal = toroidal
+        if isinstance(toroidal, (tuple, list)):
+            self.toroidal_v, self.toroidal_h = toroidal
+        else:
+            self.toroidal_v = self.toroidal_h = bool(toroidal)
 
     def compute_unary(self, fixed_labels=None):
         """
@@ -96,12 +101,14 @@ class MRFModel:
                 for j in range(w):
                     ni = i + di
                     nj = j + dj
-                    if self.toroidal:
+                    if self.toroidal_v:
                         ni = ni % h
+                    elif ni < 0 or ni >= h:
+                        continue
+                    if self.toroidal_h:
                         nj = nj % w
-                    else:
-                        if ni < 0 or ni >= h or nj < 0 or nj >= w:
-                            continue
+                    elif nj < 0 or nj >= w:
+                        continue
                     idx1 = i * w + j
                     idx2 = ni * w + nj
                     if idx1 != idx2:  # avoid self-loops at corners

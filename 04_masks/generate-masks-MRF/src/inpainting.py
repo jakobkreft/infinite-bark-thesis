@@ -1,100 +1,141 @@
 """
-MAP inpainting for hole filling using graph-cut alpha-expansion (gco-wrapper),
-with optional Gibbs refinement on the inpainted region.
+Nonparametric multiscale Gibbs inpainting.
+
+Unknown pixels are randomly initialized and then synthesized with exactly
+the same coarse-to-fine + Gibbs-refinement algorithm `synthesize_mask` uses
+to build a mask from nothing (see synthesis.py) -- the only difference is
+that every pass is restricted to the unknown region via `update_mask`, so
+known pixels are read-only context (fixed boundary conditions) that are
+never themselves resampled. This is what makes the fill look like genuine
+random bark texture instead of a flat MAP estimate: it's a real sample from
+the same nonparametric texture model `synthesize` draws from, just
+constrained by whatever's already known around the hole.
 """
 
 import numpy as np
-from tqdm import tqdm
 
-from .mrf_model import MRFModel, NUM_LABELS
-from .dataset import _full_neighborhood_offsets
-from .synthesis import _cond_dist, _build_table, _extract_nbr
+from .dataset import NUM_LABELS
+from .synthesis import (
+    _RatioController,
+    _gibbs_sweep,
+    _nn_downsample_labels,
+    _nn_upsample_labels,
+    _normalize_target_ratio,
+    _raster_pass,
+)
 
 
 def inpaint(
     mask,
-    dataset,
+    trained_model,
     unknown_value=-1,
-    pairwise_scale=1.0,
     target_ratio=None,
     lambda_ratio=1.0,
-    toroidal=True,
-    n_refine=2,
-    radius=3,
+    tileable_v=True,
+    tileable_h=True,
+    multiscale=True,
+    n_refine=3,
     temperature=1.0,
     k_fallback=11,
+    seed=None,
+    verbose=True,
 ):
     """
-    Inpaint unknown regions in a label mask using graph-cut MAP inference,
-    optionally followed by Gibbs refinement.
+    Fill unknown regions in a label mask by nonparametric texture synthesis,
+    constrained by the known pixels.
 
     Args:
-        mask: (H, W) int array with values in {0,1,2} for known pixels
-              and unknown_value (-1) for pixels to inpaint
-        dataset: BarkMaskDataset for estimating potentials and Gibbs refinement
+        mask: (H, W) int array with values in {0,1,2} for known pixels and
+            `unknown_value` for pixels to fill in.
+        trained_model: a `model_cache.TrainedModel` with class frequencies
+            and causal/full neighborhood tables from the training dataset.
+        multiscale: fill a coarse (1/4 resolution) version of the hole
+            first for large-scale structure, then refine at full
+            resolution -- same as `synthesize_mask`. Strongly recommended
+            for large holes, which otherwise tend to mix very slowly from a
+            flat random initialization.
+        n_refine: number of full Gibbs sweeps over the unknown region after
+            the initial fill.
 
     Returns:
-        result: (H, W) int8 array, fully filled
+        result: (H, W) int8 array, fully filled. Known pixels are returned
+        unchanged.
     """
+    if seed is not None:
+        np.random.seed(seed)
+
     h, w = mask.shape
     mask = mask.copy().astype(np.int8)
-
-    class_freqs = dataset.estimate_class_frequencies()
-    pairwise = dataset.estimate_pairwise_potentials()
-
-    model = MRFModel(
-        h, w, class_freqs, pairwise,
-        target_ratio=target_ratio,
-        lambda_ratio=lambda_ratio,
-        toroidal=toroidal,
-    )
-
-    fixed_labels = mask.copy()
-
-    print("Running graph-cut MAP inference for inpainting...")
-    result = model.map_inference(
-        fixed_labels=fixed_labels,
-        pairwise_scale=pairwise_scale,
-    )
-    result = result.astype(np.int8)
-
-    # Restore known pixels (in case graph cut altered them slightly)
     known_mask = mask != unknown_value
-    result[known_mask] = mask[known_mask]
+    unknown_mask = ~known_mask
+    n_unknown = int(unknown_mask.sum())
 
-    if n_refine > 0:
-        print("Gibbs refinement on inpainted region...")
-        full_offset_list = _full_neighborhood_offsets(radius)
-        full_di = np.array([o[0] for o in full_offset_list], dtype=np.int32)
-        full_dj = np.array([o[1] for o in full_offset_list], dtype=np.int32)
-        full_table, full_kdtree, full_kd_labels = _build_table(
-            dataset, full_di, full_dj
+    print(f"Inpainting {n_unknown} unknown pixels "
+          f"({'multiscale' if multiscale else 'single-scale'}, "
+          f"{n_refine} refinement sweep(s))...")
+
+    result = mask.copy()
+    if n_unknown == 0:
+        return result
+
+    class_freqs = trained_model.class_freqs
+    ratio_target = _normalize_target_ratio(target_ratio)
+    if ratio_target is not None and lambda_ratio <= 0:
+        ratio_target = None
+
+    if multiscale:
+        ch, cw = max(h // 4, 8), max(w // 4, 8)
+        if verbose:
+            print(f"Multiscale inpaint: filling coarse {ch}x{cw}...")
+        coarse = _nn_downsample_labels(result, ch, cw)
+        coarse_unknown = coarse == unknown_value
+        _random_fill(coarse, coarse_unknown, class_freqs)
+        coarse_ratio = _RatioController(coarse, ratio_target, lambda_ratio)
+        _raster_pass(
+            coarse, trained_model.causal_table, trained_model.causal_kdtree,
+            trained_model.causal_kd_counts,
+            trained_model.causal_di, trained_model.causal_dj,
+            coarse_ratio, temperature, k_fallback,
+            tileable_v, tileable_h, desc="Coarse inpaint raster", verbose=verbose,
+            update_mask=coarse_unknown,
         )
 
-        proportion_bias = np.zeros(NUM_LABELS, dtype=np.float64)
-        if target_ratio is not None:
-            target = np.clip(np.array(target_ratio, dtype=np.float64), 1e-8, 1.0)
-            proportion_bias = lambda_ratio * np.log(
-                target / np.clip(class_freqs, 1e-8, 1.0)
-            )
+        result = _nn_upsample_labels(coarse, h, w)
+        result[known_mask] = mask[known_mask]
 
-        unknown_indices = list(zip(*np.where(~known_mask)))
-        rand_vals = np.random.random(len(unknown_indices) * n_refine)
-        rv_idx = 0
-        for sweep in range(n_refine):
-            np.random.shuffle(unknown_indices)
-            for i, j in tqdm(
-                unknown_indices,
-                desc=f"Inpaint Gibbs {sweep + 1}/{n_refine}",
-                leave=False,
-            ):
-                nbr = _extract_nbr(result, i, j, full_di, full_dj, h, w)
-                probs = _cond_dist(
-                    nbr, full_table, full_kdtree, full_kd_labels,
-                    proportion_bias, temperature, k_fallback,
-                )
-                cumprobs = np.cumsum(probs)
-                result[i, j] = np.searchsorted(cumprobs, rand_vals[rv_idx])
-                rv_idx += 1
+        if verbose:
+            print(f"Multiscale inpaint: filling at full {h}x{w}...")
+        fine_ratio = _RatioController(result, ratio_target, lambda_ratio)
+        _raster_pass(
+            result, trained_model.causal_table, trained_model.causal_kdtree,
+            trained_model.causal_kd_counts,
+            trained_model.causal_di, trained_model.causal_dj,
+            fine_ratio, temperature, k_fallback,
+            tileable_v, tileable_h, desc="Fine inpaint raster", verbose=verbose,
+            update_mask=unknown_mask,
+        )
+    else:
+        _random_fill(result, unknown_mask, class_freqs)
+
+    refine_ratio = _RatioController(result, ratio_target, lambda_ratio)
+    for sweep in range(n_refine):
+        _gibbs_sweep(
+            result, trained_model.full_table, trained_model.full_kdtree,
+            trained_model.full_kd_counts,
+            trained_model.full_di, trained_model.full_dj,
+            refine_ratio, temperature, k_fallback,
+            tileable_v, tileable_h,
+            desc=f"Inpaint Gibbs refinement {sweep + 1}/{n_refine}", verbose=verbose,
+            update_mask=unknown_mask,
+        )
 
     return result
+
+
+def _random_fill(canvas, update_mask, class_freqs):
+    """Randomly initialize the positions marked True in update_mask."""
+    n = int(update_mask.sum())
+    if n:
+        canvas[update_mask] = np.random.choice(
+            NUM_LABELS, size=n, p=class_freqs
+        ).astype(np.int8)

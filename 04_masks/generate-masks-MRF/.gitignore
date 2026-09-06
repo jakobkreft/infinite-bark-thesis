@@ -1,2 +1,19 @@
+# Datasets
 masks-dataset/
+masks-dataset-old/
+
+# Generated output / cache
 outputs/
+.mrf_cache/
+
+# Generated masks and test images (not source)
+MRF_32_masks/
+MRF_512_masks/
+/*.png
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Local editor / tooling config
+.claude/
